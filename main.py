@@ -1,50 +1,52 @@
 class Database:
+    NULL = 'NULL'
 
     def __init__(self):
         self._transaction_counter = 0
         self._main_db = {self._transaction_counter: {}}
         self.db = self._main_db[self._transaction_counter]
 
-    def get_val(self, key: str):
-        print(self.db.get(key, 'NULL'))
+    def get(self, key: str):
+        return self.db.get(key, self.NULL)
 
-    def set_val(self, key: str, val: int):
+    def set(self, key: str, val: int):
         self.db[key] = val
 
-    def find(self, val: int):
+    def find(self, val: int) -> str:
         lst = [k for k, v in self.db.items() if v == val]
-        print(" ".join(lst))
+        return " ".join(lst)
 
     def counts(self, val: int):
-        print(list(self.db.values()).count(val))
+        return list(self.db.values()).count(val)
 
-    def unset(self, key):
+    def unset(self, key: str) -> None:
         if self.db.get(key):
             self.db.pop(key)
 
-    @staticmethod
-    def end():
+    def end(self) -> None:
         exit(0)
 
-    def begin(self):
+    def begin(self) -> None:
         self._main_db[self._transaction_counter + 1] = self._main_db[self._transaction_counter].copy()
         self._transaction_counter += 1
         self.db = self._main_db[self._transaction_counter]
 
-    def rollback(self):
-        self._main_db.pop(self._transaction_counter)
-        self._transaction_counter -= 1
-        self.db = self._main_db[self._transaction_counter]
+    def rollback(self) -> None:
+        if self._transaction_counter > 0:
+            self._main_db.pop(self._transaction_counter)
+            self._transaction_counter -= 1
+            self.db = self._main_db[self._transaction_counter]
 
-    def commit(self):
-        self._main_db[self._transaction_counter - 1] = self._main_db[self._transaction_counter].copy()
-        self._main_db.pop(self._transaction_counter)
-        self._transaction_counter -= 1
-        self.db = self._main_db[self._transaction_counter]
+    def commit(self) -> None:
+        if self._transaction_counter > 0:
+            self._main_db[self._transaction_counter - 1] = self._main_db[self._transaction_counter].copy()
+            self._main_db.pop(self._transaction_counter)
+            self._transaction_counter -= 1
+            self.db = self._main_db[self._transaction_counter]
 
 commands = {
-    'GET': Database.get_val,
-    'SET': Database.set_val,
+    'GET': Database.get,
+    'SET': Database.set,
     'FIND': Database.find,
     'COUNTS': Database.counts,
     'END': Database.end,
@@ -63,7 +65,9 @@ def main():
             continue
         lst = query.split()
         command = lst.pop(0).upper()
-        commands[command](database, *lst)
+        result = commands[command](database, *lst)
+        if result:
+            print(result)
 
 if __name__ == '__main__':
     main()
