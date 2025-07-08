@@ -57,6 +57,7 @@ class DatabaseTests(TestCase):
         self.assertEqual(self.database.get("B"), 20)
 
     def test_custom_commands(self):
+        self.database.unset("A")
         self.database.set("A", 10)
         self.database.set("A", 10)
         self.database.set("B", 10)
