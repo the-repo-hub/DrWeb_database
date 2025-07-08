@@ -1,6 +1,5 @@
 from typing import Union
 
-
 class Database:
     NULL = 'NULL'
 
