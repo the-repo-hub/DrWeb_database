@@ -59,15 +59,20 @@ commands = {
 def main():
     database = Database()
     query = str()
-    while query != "END":
-        query = input()
-        if not query:
-            continue
-        lst = query.split()
-        command = lst.pop(0).upper()
-        result = commands[command](database, *lst)
-        if result:
-            print(result)
+    try:
+        while query != "END":
+            query = input()
+            if not query:
+                continue
+            lst = query.split()
+            command = lst.pop(0).upper()
+            result = commands[command](database, *lst)
+            if result:
+                print(result)
+    except EOFError:
+        database.end()
+    except KeyboardInterrupt:
+        database.end()
 
 if __name__ == '__main__':
     main()
