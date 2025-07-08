@@ -7,8 +7,8 @@ class DatabaseTests(TestCase):
 
 
     def setUp(self):
-        self.database = Database()
         super(DatabaseTests, self).setUp()
+        self.database = Database()
 
     def test_simple_example(self):
         self.assertEqual(self.database.get("A"), self.database.NULL)

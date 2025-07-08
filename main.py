@@ -1,5 +1,6 @@
 from typing import Union
 
+
 class Database:
     NULL = 'NULL'
 
@@ -11,14 +12,14 @@ class Database:
     def get(self, key: str) -> Union[str, int]:
         return self.db.get(key, self.NULL)
 
-    def set(self, key: str, val: int) -> None:
+    def set(self, key: str, val: str) -> None:
         self.db[key] = val
 
-    def find(self, val: int) -> str:
+    def find(self, val: str) -> str:
         lst = [k for k, v in self.db.items() if v == val]
         return " ".join(lst)
 
-    def counts(self, val: int) -> int:
+    def counts(self, val: str) -> int:
         return list(self.db.values()).count(val)
 
     def unset(self, key: str) -> None:
