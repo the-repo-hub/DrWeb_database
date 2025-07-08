@@ -91,23 +91,26 @@ commands = {
     'COMMIT': Database.commit,
 }
 
-def main():
-    database = Database()
-    query = str()
+def input_handle(database: Database) -> str:
     try:
-        while query != "END":
-            query = input()
-            if not query:
-                continue
-            lst = query.split()
-            command = lst.pop(0).upper()
-            result = commands[command](database, *lst)
-            if result:
-                print(result)
+        return input()
     except EOFError:
         database.end()
     except KeyboardInterrupt:
         database.end()
+
+def main():
+    database = Database()
+    query = str()
+    while query != "END":
+        query = input_handle(database)
+        if not query:
+            continue
+        lst = query.split()
+        command = lst.pop(0).upper()
+        result = commands[command](database, *lst)
+        if result:
+            print(result)
 
 if __name__ == '__main__':
     main()
