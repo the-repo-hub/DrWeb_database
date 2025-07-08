@@ -7,45 +7,77 @@ class Database:
     def __init__(self):
         self._transaction_counter = 0
         self._main_db = {self._transaction_counter: {}}
-        self.db = self._main_db[self._transaction_counter]
 
     def get(self, key: str) -> Union[str, int]:
-        return self.db.get(key, self.NULL)
+        c = self._transaction_counter
+        while c >= 0:
+            db = self._main_db[c]
+            if key in db.keys():
+                result = db.get(key)
+                # if result is None (unset)
+                return result if result else self.NULL
+            c -= 1
+        return self.NULL
 
     def set(self, key: str, val: str) -> None:
-        self.db[key] = val
+        db = self._main_db[self._transaction_counter]
+        db[key] = val
 
     def find(self, val: str) -> str:
-        lst = [k for k, v in self.db.items() if v == val]
-        return " ".join(lst)
+        c = self._transaction_counter
+        variables = []
+        while c >= 0:
+            db = self._main_db[c]
+            for k,v in db.items():
+                if val == v and k not in variables:
+                    # not set for ordering
+                    variables.append(k)
+            c -= 1
+        return " ".join(variables)
 
     def counts(self, val: str) -> int:
-        return list(self.db.values()).count(val)
+        c = self._transaction_counter
+        result = 0
+        keys_set = set()
+        while c >= 0:
+            db = self._main_db[c]
+            for key, value in db.items():
+                if value == val and key not in keys_set:
+                    result += 1
+                    keys_set.add(key)
+            c -= 1
+        return result
 
     def unset(self, key: str) -> None:
-        if self.db.get(key):
-            self.db.pop(key)
+        db = self._main_db[self._transaction_counter]
+        if self._transaction_counter > 0:
+            db[key] = None
+        else:
+            value = db.get(key)
+            if value:
+                del db[key]
 
     def end(self) -> None:
         exit(0)
 
     def begin(self) -> None:
-        self._main_db[self._transaction_counter + 1] = self._main_db[self._transaction_counter].copy()
         self._transaction_counter += 1
-        self.db = self._main_db[self._transaction_counter]
+        self._main_db[self._transaction_counter] = {}
 
     def rollback(self) -> None:
         if self._transaction_counter > 0:
-            self._main_db.pop(self._transaction_counter)
+            del self._main_db[self._transaction_counter]
             self._transaction_counter -= 1
-            self.db = self._main_db[self._transaction_counter]
 
     def commit(self) -> None:
         if self._transaction_counter > 0:
-            self._main_db[self._transaction_counter - 1] = self._main_db[self._transaction_counter].copy()
-            self._main_db.pop(self._transaction_counter)
+            self._main_db[self._transaction_counter - 1].update(self._main_db[self._transaction_counter])
+            del self._main_db[self._transaction_counter]
             self._transaction_counter -= 1
-            self.db = self._main_db[self._transaction_counter]
+            db = self._main_db[self._transaction_counter]
+            for key in set(db.keys()):
+                if db.get(key) is None:
+                    del self._main_db[self._transaction_counter][key]
 
 commands = {
     'GET': Database.get,
