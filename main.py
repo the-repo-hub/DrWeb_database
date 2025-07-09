@@ -25,15 +25,17 @@ class Database:
 
     def find(self, val: str) -> str:
         c = self._transaction_counter
-        variables = []
+        result = []
+        keys = set()
         while c >= 0:
             db = self._main_db[c]
             for k,v in db.items():
-                if val == v and k not in variables:
+                if val == v and k not in keys:
                     # not set for ordering
-                    variables.append(k)
+                    result.append(k)
+                keys.add(k)
             c -= 1
-        return " ".join(variables)
+        return " ".join(result)
 
     def counts(self, val: str) -> int:
         c = self._transaction_counter
@@ -109,7 +111,7 @@ def main():
         lst = query.split()
         command = lst.pop(0).upper()
         result = commands[command](database, *lst)
-        if result:
+        if result is not None:
             print(result)
 
 if __name__ == '__main__':

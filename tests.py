@@ -47,11 +47,19 @@ class DatabaseTests(TestCase):
         self.database.begin()# 2
         self.database.set("A", '10')
         self.database.begin()# 3
+        self.assertEqual(self.database.find('10'), 'A')
+        self.assertEqual(self.database.find('20'), 'B C')
         self.database.rollback()
         self.database.begin()# 3
         self.database.set("A", '30')
         self.database.commit() # 2
+        self.assertEqual(self.database.find('10'), '')
         self.assertEqual(self.database.get("A"), '30')
+        self.database.begin()
+        self.database.begin()
+        self.assertEqual(self.database.find('20'), 'B C')
+        self.database.rollback()
+        self.database.rollback()
         self.database.rollback()# 1
         self.assertEqual(self.database.get("A"), '20')
         self.assertEqual(self.database.get("B"), '20')
@@ -91,7 +99,10 @@ class DatabaseTests(TestCase):
         self.assertEqual(self.database.get("A"), '20')
         self.assertEqual(self.database.counts('10'), 1)
         self.assertEqual(self.database.counts("20"), 1)
+        self.assertEqual(self.database.find('10'), 'B')
         self.assertEqual(self.database.counts("0"), 0)
+        self.assertEqual(self.database.find('10'), 'B')
+        self.assertEqual(self.database.find('20'), 'A')
         self.database.commit()
         self.database.rollback()
         self.assertEqual(self.database.get("A"), '10')
