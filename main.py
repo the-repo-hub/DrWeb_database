@@ -44,7 +44,7 @@ class Database:
             for key, value in db.items():
                 if value == val and key not in keys_set:
                     result += 1
-                    keys_set.add(key)
+                keys_set.add(key)
             c -= 1
         return result
 
